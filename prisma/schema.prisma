@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Basic models
+
+model Word {
+  id                 String           @id @unique @default(uuid())
+  content            String
+  translationGroup   TranslationGroup @relation(fields: [translationGroupId], references: [id])
+  translationGroupId String
+  language           Language         @relation(fields: [languageName], references: [name])
+  languageName       String
+}
+
+model TranslationGroup {
+  id     String                      @id @unique @default(uuid())
+  words  Word[]
+  tags   TagsOnTranslationGroups[]
+  sheets SheetsOnTranslationGroups[]
+}
+
+model Tag {
+  name              String                    @id @unique @default(uuid())
+  translationGroups TagsOnTranslationGroups[]
+}
+
+model Language {
+  name  String @id @unique
+  words Word[]
+}
+
+model Sheet {
+  id                String                      @id @unique @default(uuid())
+  title             String
+  lookedAtTimes     Int                         @default(0)
+  points            Int                         @default(0)
+  containsProfanity Boolean                     @default(false)
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+  translationGroups SheetsOnTranslationGroups[]
+  createdBy         User                        @relation(fields: [createdByUserId], references: [id])
+  createdByUserId   String
+}
+
+model User {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  username     String   @unique
+  passwordHash String
+  sheets       Sheet[]
+}
+
+// --- Relationship tables
+
+model TagsOnTranslationGroups {
+  tag                Tag              @relation(fields: [tagId], references: [name])
+  tagId              String
+  translationGroup   TranslationGroup @relation(fields: [translationGroupId], references: [id])
+  translationGroupId String
+
+  @@id([tagId, translationGroupId])
+}
+
+model SheetsOnTranslationGroups {
+  sheet              Sheet            @relation(fields: [sheetId], references: [id])
+  sheetId            String
+  translationGroup   TranslationGroup @relation(fields: [translationGroupId], references: [id])
+  translationGroupId String
+
+  @@id([sheetId, translationGroupId])
+}
