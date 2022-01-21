@@ -1,8 +1,15 @@
 import clsx from "clsx";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ActionFunction, Form, json, MetaFunction, useActionData } from "remix";
+import {
+  ActionFunction,
+  Form,
+  json,
+  Link,
+  MetaFunction,
+  useActionData,
+} from "remix";
 import { z, ZodError } from "zod";
+import { formatZodError } from "~/utils/formatZodError";
 import { createUserSession, login } from "~/utils/session.server";
 import { signInSchema } from "~/utils/validators";
 
@@ -33,7 +40,7 @@ export const action: ActionFunction = async ({ request }) => {
     if (!user) {
       return badRequest({
         fields,
-        formError: "Not implemented",
+        formError: "Username or password is incorrect",
       });
     }
     return createUserSession(user.id, "/");
@@ -44,14 +51,7 @@ export const action: ActionFunction = async ({ request }) => {
 
     // converting zod errors to useful format
     // will only apply one error per input field
-    const fieldErrors = e.issues.reduce(
-      (acc, c) => ({
-        ...acc,
-        [c.path[0]]: c.message,
-      }),
-      {}
-    );
-
+    const fieldErrors = formatZodError(e);
     console.log({ fieldErrors });
 
     return {

@@ -19,7 +19,7 @@ const db = new PrismaClient();
   await db.user.create({
     data: {
       username: "aleks",
-      passwordHash: await argon.hash("chicken"),
+      passwordHash: await argon.hash("Chicken123"),
       sheets: {
         create: Array(5)
           .fill(true)

@@ -14,6 +14,7 @@ import { signUpSchema } from "~/utils/validators";
 import style from "~/styles/authForms.css";
 import { useState } from "react";
 import clsx from "clsx";
+import { formatZodError } from "~/utils/formatZodError";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: style }];
 
@@ -73,16 +74,7 @@ export const action: ActionFunction = async ({ request }) => {
     // Casting the error to be Zod Error as it's the only thing that can throw (prisma won't)
     const e = error as ZodError<typeof signUpSchema>;
 
-    // converting zod errors to useful format
-    // will only apply one error per input field
-    const fieldErrors = e.issues.reduce(
-      (acc, c) => ({
-        ...acc,
-        [c.path[0]]: c.message,
-      }),
-      {}
-    );
-
+    const fieldErrors = formatZodError(e);
     console.log({ fieldErrors });
 
     return {

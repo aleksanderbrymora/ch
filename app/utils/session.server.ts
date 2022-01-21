@@ -10,7 +10,7 @@ interface LoginForm {
 export const login = async ({ username, password }: LoginForm) => {
   const found = await db.user.findUnique({ where: { username } });
   if (!found) return null;
-  const passwordMatch = await argon.verify(password, found.passwordHash);
+  const passwordMatch = await argon.verify(found.passwordHash, password);
   return !passwordMatch ? null : found;
 };
 

@@ -756,10 +756,6 @@ input {
   color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
-.focus-within\:outline-white:focus-within {
-  outline-color: #fff;
-}
-
 .focus\:outline-none:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
