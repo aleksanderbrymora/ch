@@ -1,6 +1,17 @@
-import { LinksFunction, Meta, MetaFunction, Scripts, useCatch } from "remix";
+import { User } from "@prisma/client";
+import {
+  LinksFunction,
+  LoaderFunction,
+  Meta,
+  MetaFunction,
+  Scripts,
+  useCatch,
+  useLoaderData,
+} from "remix";
 import { Links, LiveReload, Outlet } from "remix";
+import Nav from "./components/Nav";
 import globalStylesUrl from "./index.css";
+import { getUser } from "./utils/session.server";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: globalStylesUrl }];
@@ -30,11 +41,25 @@ const Document = ({
   );
 };
 
-export default () => (
-  <Document>
-    <Outlet />
-  </Document>
-);
+type LoaderData = {
+  user: Pick<User, "id" | "username"> | null;
+};
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const user = await getUser(request);
+  const data: LoaderData = { user };
+  return data;
+};
+
+export default () => {
+  const { user } = useLoaderData<LoaderData>();
+  return (
+    <Document>
+      <Nav userId={user?.id || null} />
+      <Outlet />
+    </Document>
+  );
+};
 
 export const CatchBoundary = () => {
   const caught = useCatch();

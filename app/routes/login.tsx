@@ -36,7 +36,7 @@ export const action: ActionFunction = async ({ request }) => {
     const { username, password } = signInSchema.parse(formPayload);
     const fields = { username, password };
     const user = await login({ username, password });
-    console.log({ user });
+
     if (!user) {
       return badRequest({
         fields,
@@ -52,7 +52,6 @@ export const action: ActionFunction = async ({ request }) => {
     // converting zod errors to useful format
     // will only apply one error per input field
     const fieldErrors = formatZodError(e);
-    console.log({ fieldErrors });
 
     return {
       fields: formPayload,

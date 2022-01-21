@@ -31,13 +31,15 @@ model Tag {
 }
 
 model Language {
-  name  String @id @unique
-  words Word[]
+  name      String  @id @unique
+  words     Word[]
+  fromSheet Sheet[] @relation("fromLanguage")
+  toSheet   Sheet[] @relation("toLanguage")
 }
 
 model Sheet {
   id                String                      @id @unique @default(uuid())
-  title             String
+  title             String                      @default("New Cheat Sheet")
   lookedAtTimes     Int                         @default(0)
   points            Int                         @default(0)
   containsProfanity Boolean                     @default(false)
@@ -46,6 +48,11 @@ model Sheet {
   translationGroups SheetsOnTranslationGroups[]
   createdBy         User                        @relation(fields: [createdByUserId], references: [id])
   createdByUserId   String
+
+  from         Language @relation(name: "fromLanguage", fields: [fromLanguage], references: [name])
+  fromLanguage String
+  to           Language @relation(name: "toLanguage", fields: [toLanguage], references: [name])
+  toLanguage   String
 }
 
 model User {

@@ -75,7 +75,6 @@ export const action: ActionFunction = async ({ request }) => {
     const e = error as ZodError<typeof signUpSchema>;
 
     const fieldErrors = formatZodError(e);
-    console.log({ fieldErrors });
 
     return {
       fields: formPayload,

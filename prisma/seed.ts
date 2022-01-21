@@ -25,6 +25,9 @@ const db = new PrismaClient();
           .fill(true)
           .map((_) => ({
             title: faker.random.randomWord(),
+            points: faker.datatype.number({ min: 1, max: 10000 }),
+            from: { connect: { name: polish.name } },
+            to: { connect: { name: english.name } },
             translationGroups: {
               create: Array(20)
                 .fill(true)

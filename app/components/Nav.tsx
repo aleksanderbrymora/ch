@@ -3,20 +3,36 @@ import { Link } from "remix";
 
 const Nav: FC<{ userId: string | null }> = ({ userId }) => {
   return (
-    <nav className="flex gap-3">
-      <Link to="/">Home</Link>
-      {userId ? (
-        <form action="/logout" method="post">
-          <button type="submit" className="button">
-            Logout
-          </button>
-        </form>
-      ) : (
-        <>
-          <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
-        </>
-      )}
+    <nav className="flex justify-between container mx-auto my-5">
+      <div className="flex gap-5 items-center">
+        <Link to="/">Home</Link>
+        <Link to="/sheets">Sheets</Link>
+      </div>
+      <div className="flex gap-10 items-center">
+        {userId ? (
+          <>
+            <Link
+              className="p-2 bg-white text-black rounded-md font-bold hover:bg-zinc-200 transition-colors"
+              to="/sheets/new"
+            >
+              Create your own
+            </Link>
+            <form action="/logout" method="post">
+              <button
+                type="submit"
+                className="underline underline-offset-8 font-bold transition-all hover:underline-offset-4"
+              >
+                Logout
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
+          </>
+        )}
+      </div>
     </nav>
   );
 };
