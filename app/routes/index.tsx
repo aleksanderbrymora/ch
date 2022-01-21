@@ -1,7 +1,7 @@
 import { User } from "@prisma/client";
 import { Link, LoaderFunction, MetaFunction, useLoaderData } from "remix";
 import Nav from "~/components/Nav";
-import { getUser } from "~/utils/session.server";
+import { getUser, getUserId } from "~/utils/session.server";
 
 export const meta: MetaFunction = () => {
   return {
@@ -11,21 +11,21 @@ export const meta: MetaFunction = () => {
 };
 
 type LoaderData = {
-  user: Pick<User, "username" | "id"> | null;
+  userId: string | null;
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const user = await getUser(request);
-  const data: LoaderData = { user };
+  const userId = await getUserId(request);
+  const data: LoaderData = { userId };
   return data;
 };
 
 export default function Index() {
-  const { user } = useLoaderData<LoaderData>();
+  const { userId } = useLoaderData<LoaderData>();
 
   return (
     <>
-      <Nav user={user} />
+      <Nav userId={userId} />
     </>
   );
 }

@@ -3,13 +3,19 @@ import {
   Form,
   json,
   Link,
+  LinksFunction,
   MetaFunction,
   useActionData,
 } from "remix";
 import type { z, ZodError } from "zod";
 import { db } from "~/utils/db.server";
 import { createUserSession, register } from "~/utils/session.server";
-import { signupSchema } from "~/utils/validators";
+import { signUpSchema } from "~/utils/validators";
+import style from "~/styles/authForms.css";
+import { useState } from "react";
+import clsx from "clsx";
+
+export const links: LinksFunction = () => [{ rel: "stylesheet", href: style }];
 
 // ---- Meta tags
 export const meta: MetaFunction = () => {
@@ -20,7 +26,7 @@ export const meta: MetaFunction = () => {
 };
 
 // ---- Types
-type Fields = z.infer<typeof signupSchema>;
+type Fields = z.infer<typeof signUpSchema>;
 type ActionData = Partial<{
   formError: string;
   fields: Fields;
@@ -35,7 +41,7 @@ export const action: ActionFunction = async ({ request }) => {
 
   try {
     // ---- Validating passed params
-    const { password, username } = signupSchema.parse(formPayload);
+    const { password, username } = signUpSchema.parse(formPayload);
     const fields = { username, password };
 
     // ---- Username check
@@ -65,7 +71,7 @@ export const action: ActionFunction = async ({ request }) => {
     console.error({ error });
 
     // Casting the error to be Zod Error as it's the only thing that can throw (prisma won't)
-    const e = error as ZodError<typeof signupSchema>;
+    const e = error as ZodError<typeof signUpSchema>;
 
     // converting zod errors to useful format
     // will only apply one error per input field
@@ -87,20 +93,37 @@ export const action: ActionFunction = async ({ request }) => {
 };
 export default function Login() {
   const actionData = useActionData<ActionData>();
-  console.log(actionData);
+  const [focusUsername, setFocusUsername] = useState(false);
+  const [focusPassword, setFocusPassword] = useState(false);
 
   return (
-    <div>
-      <div>
-        <h1>Login</h1>
-        <Form
-          method="post"
-          aria-describedby={
-            actionData?.formError ? "form-error-message" : undefined
-          }
-        >
-          <div>
-            <label htmlFor="username-input">Username</label>
+    <div className="w-1/3 p-5 mx-auto mt-20">
+      <h1 className="text-4xl font-bold whitespace-nowrap mb-5">
+        Sign up to Cheat Sheets
+      </h1>
+      <p className="mb-5">
+        <span>Already have an account? </span>
+        <Link className="text-blue-400" to="/login">
+          Sign in
+        </Link>
+      </p>
+      <Form
+        method="post"
+        aria-describedby={
+          actionData?.formError ? "form-error-message" : undefined
+        }
+        className="grid grid-cols-2 gap-5"
+      >
+        <div>
+          <div
+            className={clsx(
+              `bg-zinc-800 pt-1 pb-3 px-4 rounded-xl border-2`,
+              focusUsername ? "border-blue-400" : "border-transparent"
+            )}
+          >
+            <label htmlFor="username-input" className="text-xs w-full">
+              Username
+            </label>
             <input
               type="text"
               id="username-input"
@@ -110,23 +133,35 @@ export default function Login() {
               aria-describedby={
                 actionData?.fieldErrors?.username ? "username-error" : undefined
               }
+              onFocus={() => setFocusUsername(true)}
+              onBlur={() => setFocusUsername(false)}
+              className="form-input w-full bg-transparent border-none font-bold rounded mt-1 text-white focus:outline-none"
             />
-            {actionData?.fieldErrors?.username ? (
-              <p
-                className="form-validation-error"
-                role="alert"
-                id="username-error"
-              >
-                {actionData?.fieldErrors.username}
-              </p>
-            ) : null}
           </div>
-          <div>
-            <label htmlFor="password-input">Password</label>
+          {actionData?.fieldErrors?.username ? (
+            <p
+              role="alert"
+              id="username-error"
+              className="px-4 mt-3 text-xs text-blue-400"
+            >
+              {actionData?.fieldErrors.username}
+            </p>
+          ) : null}
+        </div>
+        <div>
+          <div
+            className={clsx(
+              `bg-zinc-800 pt-1 pb-3 px-4 rounded-xl border-2`,
+              focusPassword ? "border-blue-400" : "border-transparent"
+            )}
+          >
+            <label htmlFor="password-input" className="text-xs w-full">
+              Password
+            </label>
             <input
               id="password-input"
               name="password"
-              defaultValue={actionData?.fields?.password || "Chicken123"}
+              defaultValue={actionData?.fields?.password}
               type="password"
               aria-invalid={
                 Boolean(actionData?.fieldErrors?.password) || undefined
@@ -134,39 +169,35 @@ export default function Login() {
               aria-describedby={
                 actionData?.fieldErrors?.password ? "password-error" : undefined
               }
+              onFocus={() => setFocusPassword(true)}
+              onBlur={() => setFocusPassword(false)}
+              className="form-input w-full bg-transparent border-none font-bold rounded mt-1 text-white focus:outline-none"
             />
-            {actionData?.fieldErrors?.password ? (
-              <p
-                className="form-validation-error"
-                role="alert"
-                id="password-error"
-              >
-                {actionData?.fieldErrors.password}
-              </p>
-            ) : null}
           </div>
-          <div id="form-error-message">
-            {actionData?.formError ? (
-              <p className="form-validation-error" role="alert">
-                {actionData?.formError}
-              </p>
-            ) : null}
-          </div>
-          <button type="submit" className="button">
+          {actionData?.fieldErrors?.password ? (
+            <p
+              className="px-4 mt-3 text-xs text-blue-400"
+              role="alert"
+              id="password-error"
+            >
+              {actionData?.fieldErrors.password}
+            </p>
+          ) : null}
+        </div>
+        <div id="form-error-message" className="col-span-2">
+          {actionData?.formError ? (
+            <p role="alert">{actionData?.formError}</p>
+          ) : null}
+        </div>
+        <div className="col-span-2">
+          <button
+            type="submit"
+            className="rounded-full bg-zinc-800 py-3 px-16 font-bold"
+          >
             Submit
           </button>
-        </Form>
-      </div>
-      <div className="links">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/jokes">Jokes</Link>
-          </li>
-        </ul>
-      </div>
+        </div>
+      </Form>
     </div>
   );
 }

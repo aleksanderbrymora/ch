@@ -1,12 +1,11 @@
-import { User } from "@prisma/client";
 import { FC } from "react";
 import { Link } from "remix";
 
-const Nav: FC<{ user: User }> = ({ user }) => {
+const Nav: FC<{ userId: string | null }> = ({ userId }) => {
   return (
     <nav className="flex gap-3">
       <Link to="/">Home</Link>
-      {user ? (
+      {userId ? (
         <form action="/logout" method="post">
           <button type="submit" className="button">
             Logout

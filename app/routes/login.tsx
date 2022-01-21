@@ -1,159 +1,99 @@
-import {
-  ActionFunction,
-  json,
-  Link,
-  MetaFunction,
-  useActionData,
-  Form,
-  useSearchParams,
-} from "remix";
-import { db } from "~/utils/db.server";
-import { createUserSession, login, register } from "~/utils/session.server";
+import clsx from "clsx";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ActionFunction, Form, json, MetaFunction, useActionData } from "remix";
+import { z, ZodError } from "zod";
+import { createUserSession, login } from "~/utils/session.server";
+import { signInSchema } from "~/utils/validators";
 
 export const meta: MetaFunction = () => {
   return {
-    title: "Remix Jokes | Login",
-    description: "Login to submit your own jokes to Remix Jokes!",
+    title: "Cheat Sheets | Login",
+    description: "Login to create your own Cheat Sheets",
   };
 };
 
-const validateUsername = (username: unknown) => {
-  if (typeof username !== "string" || username.length < 3) {
-    return `Usernames must be at least 3 characters long`;
-  }
-};
-
-const validatePassword = (password: unknown) => {
-  if (typeof password !== "string" || password.length < 6) {
-    return `Passwords must be at least 6 characters long`;
-  }
-};
-
-interface Fields {
-  loginType: string;
-  username: string;
-  password: string;
-}
-
+type Fields = z.infer<typeof signInSchema>;
 type ActionData = Partial<{
   formError: string;
-  fieldErrors: Partial<Omit<Fields, "loginType">>;
   fields: Fields;
+  fieldErrors: Partial<Fields>;
 }>;
 
 const badRequest = (data: ActionData) => json(data, { status: 400 });
 
 export const action: ActionFunction = async ({ request }) => {
-  const form = await request.formData();
-  const loginType = form.get("loginType");
-  const username = form.get("username");
-  const password = form.get("password");
-  const redirectTo = form.get("redirectTo") || "/jokes";
-  if (
-    typeof loginType !== "string" ||
-    typeof username !== "string" ||
-    typeof password !== "string" ||
-    typeof redirectTo !== "string"
-  ) {
-    return badRequest({
-      formError: `Form not submitted correctly.`,
-    });
-  }
+  const formPayload = Object.fromEntries(await request.formData());
 
-  const fields = { loginType, username, password };
-  const fieldErrors = {
-    username: validateUsername(username),
-    password: validatePassword(password),
-  };
-  if (Object.values(fieldErrors).some(Boolean))
-    return badRequest({ fieldErrors, fields });
-
-  switch (loginType) {
-    case "login": {
-      const user = await login({ username, password });
-      console.log({ user });
-      if (!user) {
-        return badRequest({
-          fields,
-          formError: "Not implemented",
-        });
-      }
-      return createUserSession(user.id, redirectTo);
-    }
-    case "register": {
-      const userExists = await db.user.findFirst({
-        where: { username },
-      });
-      if (userExists) {
-        return badRequest({
-          fields,
-          formError: `User with username ${username} already exists`,
-        });
-      }
-      const user = await register({ username, password });
-      if (!user) {
-        return badRequest({
-          fields,
-          formError: "Something went wrong when trying to create a new user",
-        });
-      }
+  try {
+    const { username, password } = signInSchema.parse(formPayload);
+    const fields = { username, password };
+    const user = await login({ username, password });
+    console.log({ user });
+    if (!user) {
       return badRequest({
         fields,
         formError: "Not implemented",
       });
     }
-    default: {
-      return badRequest({
-        fields,
-        formError: `Login type invalid`,
-      });
-    }
+    return createUserSession(user.id, "/");
+  } catch (error) {
+    console.error(error);
+
+    const e = error as ZodError<typeof signInSchema>;
+
+    // converting zod errors to useful format
+    // will only apply one error per input field
+    const fieldErrors = e.issues.reduce(
+      (acc, c) => ({
+        ...acc,
+        [c.path[0]]: c.message,
+      }),
+      {}
+    );
+
+    console.log({ fieldErrors });
+
+    return {
+      fields: formPayload,
+      fieldErrors,
+    };
   }
 };
 export default function Login() {
   const actionData = useActionData<ActionData>();
-  const [searchParams] = useSearchParams();
+
+  const [focusUsername, setFocusUsername] = useState(false);
+  const [focusPassword, setFocusPassword] = useState(false);
+
   return (
-    <div className="container">
-      <div className="content" data-light="">
-        <h1>Login</h1>
-        <Form
-          method="post"
-          aria-describedby={
-            actionData?.formError ? "form-error-message" : undefined
-          }
-        >
-          <input
-            type="hidden"
-            name="redirectTo"
-            value={searchParams.get("redirectTo") ?? undefined}
-          />
-          <fieldset>
-            <legend className="sr-only">Login or Register?</legend>
-            <label>
-              <input
-                type="radio"
-                name="loginType"
-                value="login"
-                defaultChecked={
-                  !actionData?.fields?.loginType ||
-                  actionData?.fields?.loginType === "login"
-                }
-              />{" "}
-              Login
+    <div className="w-1/3 p-5 mx-auto mt-20">
+      <h1 className="text-4xl font-bold whitespace-nowrap mb-5">
+        Login to Cheat Sheets
+      </h1>
+      <p className="mb-5">
+        <span>Dont't have an account yet? </span>
+        <Link className="text-blue-400" to={"/register"}>
+          Sign up
+        </Link>
+      </p>
+      <Form
+        method="post"
+        aria-describedby={
+          actionData?.formError ? "form-error-message" : undefined
+        }
+        className="grid grid-cols-2 gap-5"
+      >
+        <div>
+          <div
+            className={clsx(
+              `bg-zinc-800 pt-1 pb-3 px-4 rounded-xl border-2`,
+              focusUsername ? "border-blue-400" : "border-transparent"
+            )}
+          >
+            <label htmlFor="username-input" className="text-xs w-full">
+              Username
             </label>
-            <label>
-              <input
-                type="radio"
-                name="loginType"
-                value="register"
-                defaultChecked={actionData?.fields?.loginType === "register"}
-              />{" "}
-              Register
-            </label>
-          </fieldset>
-          <div>
-            <label htmlFor="username-input">Username</label>
             <input
               type="text"
               id="username-input"
@@ -163,19 +103,31 @@ export default function Login() {
               aria-describedby={
                 actionData?.fieldErrors?.username ? "username-error" : undefined
               }
+              onFocus={() => setFocusUsername(true)}
+              onBlur={() => setFocusUsername(false)}
+              className="form-input w-full bg-transparent border-none font-bold rounded mt-1 text-white focus:outline-none"
             />
-            {actionData?.fieldErrors?.username ? (
-              <p
-                className="form-validation-error"
-                role="alert"
-                id="username-error"
-              >
-                {actionData?.fieldErrors.username}
-              </p>
-            ) : null}
           </div>
-          <div>
-            <label htmlFor="password-input">Password</label>
+          {actionData?.fieldErrors?.username ? (
+            <p
+              role="alert"
+              id="username-error"
+              className="px-4 mt-3 text-xs text-blue-400"
+            >
+              {actionData?.fieldErrors.username}
+            </p>
+          ) : null}
+        </div>
+        <div>
+          <div
+            className={clsx(
+              `bg-zinc-800 pt-1 pb-3 px-4 rounded-xl border-2`,
+              focusPassword ? "border-blue-400" : "border-transparent"
+            )}
+          >
+            <label htmlFor="password-input" className="text-xs w-full">
+              Password
+            </label>
             <input
               id="password-input"
               name="password"
@@ -187,39 +139,35 @@ export default function Login() {
               aria-describedby={
                 actionData?.fieldErrors?.password ? "password-error" : undefined
               }
+              onFocus={() => setFocusPassword(true)}
+              onBlur={() => setFocusPassword(false)}
+              className="form-input w-full bg-transparent border-none font-bold rounded mt-1 text-white focus:outline-none"
             />
-            {actionData?.fieldErrors?.password ? (
-              <p
-                className="form-validation-error"
-                role="alert"
-                id="password-error"
-              >
-                {actionData?.fieldErrors.password}
-              </p>
-            ) : null}
           </div>
-          <div id="form-error-message">
-            {actionData?.formError ? (
-              <p className="form-validation-error" role="alert">
-                {actionData?.formError}
-              </p>
-            ) : null}
-          </div>
-          <button type="submit" className="button">
+          {actionData?.fieldErrors?.password ? (
+            <p
+              className="px-4 mt-3 text-xs text-blue-400"
+              role="alert"
+              id="password-error"
+            >
+              {actionData?.fieldErrors.password}
+            </p>
+          ) : null}
+        </div>
+        <div id="form-error-message" className="col-span-2">
+          {actionData?.formError ? (
+            <p role="alert">{actionData?.formError}</p>
+          ) : null}
+        </div>
+        <div className="col-span-2">
+          <button
+            type="submit"
+            className="rounded-full bg-zinc-800 py-3 px-16 font-bold"
+          >
             Submit
           </button>
-        </Form>
-      </div>
-      <div className="links">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/jokes">Jokes</Link>
-          </li>
-        </ul>
-      </div>
+        </div>
+      </Form>
     </div>
   );
 }

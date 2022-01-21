@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const signupSchema = z.object({
+export const signUpSchema = z.object({
   username: z.string().min(3),
   password: z
     .string()
@@ -14,4 +14,9 @@ export const signupSchema = z.object({
     .refine((val) => /[A-Z]/.test(val), {
       message: "Should contain at least one uppercase letter",
     }),
+});
+
+export const signInSchema = z.object({
+  username: z.string().nonempty(),
+  password: z.string().nonempty(),
 });
