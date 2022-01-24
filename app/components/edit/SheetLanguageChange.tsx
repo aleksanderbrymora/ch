@@ -2,7 +2,7 @@ import { Transition } from "@remix-run/react/transition";
 import { FC, useEffect, useState } from "react";
 import { Form } from "remix";
 import { capitalize } from "~/utils/textTransformation";
-import ActionInput from "./ActionInput";
+import ActionButton from "./ActionButton";
 
 const SheetLanguageChange: FC<{
   availableLanguages: string[];
@@ -19,12 +19,14 @@ const SheetLanguageChange: FC<{
 
   return (
     <Form method="post" action={`/sheets/${id}`}>
-      <ActionInput type="languages.update" />
       <div className="flex gap-3 items-center">
         <p className="text-lg font-bold items-center">Languages</p>
         {isChangingLanguage ? (
           <fieldset className="flex gap-3">
-            <button type="submit" aria-label="Update title of this cheat sheet">
+            <ActionButton
+              type="languages.update"
+              aria-label="Update title of this cheat sheet"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -39,7 +41,7 @@ const SheetLanguageChange: FC<{
                   clipRule="evenodd"
                 />
               </svg>
-            </button>
+            </ActionButton>
             <button
               type="button"
               aria-label="Cancel editing the title of this cheat sheet"

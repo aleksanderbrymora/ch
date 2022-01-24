@@ -21,8 +21,6 @@ export const signInSchema = z.object({
   password: z.string().nonempty(),
 });
 
-export const SheetActionValidator = z.enum([
-  "title.update",
-  "languages.update",
-]);
-export type SheetAction = z.infer<typeof SheetActionValidator>;
+export type SheetAction =
+  | { type: "title.update" }
+  | { type: "languages.update" };

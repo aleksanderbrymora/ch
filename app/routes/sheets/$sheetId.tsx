@@ -1,3 +1,4 @@
+import { FormData } from "@remix-run/node";
 import { FC } from "react";
 import {
   ActionFunction,
@@ -11,7 +12,6 @@ import SheetLanguageChange from "~/components/edit/SheetLanguageChange";
 import SheetTitleChange from "~/components/edit/SheetTitleChange";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
-import { SheetActionValidator } from "~/utils/validators";
 
 // Hate to have to extract this information into a separate type,
 // but if I don't want to over-fetch then there is no other choice right now
@@ -92,35 +92,35 @@ const updateLanguages = async (id: string, from: string, to: string) => {
   });
 };
 
-type Action = {};
+type Action = { type: "title.update" } | { type: "languages.update" };
 
 export const action: ActionFunction = async ({ request, params }) => {
   const id = params.sheetId;
   invariant(id, "Something went wildly wrong");
 
   const formData = await request.formData();
+
+  console.log({ formData: formData.getAll("form") });
+
   try {
-    const sheetAction = SheetActionValidator.parse(formData.get("type"));
-    console.log({ sheetAction });
+    // switch (sheetAction) {
+    //   case "title.update":
+    const title = formData.get("title")?.toString() || "";
+    //     await updateTitle(id, title);
+    //     break;
 
-    switch (sheetAction) {
-      case "title.update":
-        const title = formData.get("title")?.toString() || "";
-        await updateTitle(id, title);
-        break;
+    //   case "languages.update":
+    //     const from = formData.get("from-language")?.toString();
+    //     const to = formData.get("to-language")?.toString();
+    //     invariant(from, 'Expected "from" language');
+    //     invariant(to, 'Expected "to" language');
+    //     console.log({ from, to });
+    //     await updateLanguages(id, from, to);
+    //     break;
 
-      case "languages.update":
-        const from = formData.get("from-language")?.toString();
-        const to = formData.get("to-language")?.toString();
-        invariant(from, 'Expected "from" language');
-        invariant(to, 'Expected "to" language');
-        console.log({ from, to });
-        await updateLanguages(id, from, to);
-        break;
-
-      default:
-        break;
-    }
+    //   default:
+    //     break;
+    // }
     return null;
   } catch (error) {
     console.log({ error });
