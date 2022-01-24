@@ -6,3 +6,5 @@ node_modules
 .env
 /prisma/dev.db
 /app/index.css
+
+/app/routes/example.tsx

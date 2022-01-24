@@ -20,3 +20,9 @@ export const signInSchema = z.object({
   username: z.string().nonempty(),
   password: z.string().nonempty(),
 });
+
+export const SheetActionValidator = z.enum([
+  "title.update",
+  "languages.update",
+]);
+export type SheetAction = z.infer<typeof SheetActionValidator>;
