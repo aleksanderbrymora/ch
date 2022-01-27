@@ -29,7 +29,7 @@ const db = new PrismaClient();
             from: { connect: { name: polish.name } },
             to: { connect: { name: english.name } },
             translationGroups: {
-              create: Array(20)
+              create: Array(100)
                 .fill(true)
                 .map((_) => ({
                   translationGroup: {

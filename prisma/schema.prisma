@@ -1,10 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity", "fullTextSearch"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+
 }
 
 // --- Basic models
@@ -12,7 +14,7 @@ datasource db {
 model Word {
   id                 String           @id @unique @default(uuid())
   content            String
-  translationGroup   TranslationGroup @relation(fields: [translationGroupId], references: [id])
+  translationGroup   TranslationGroup @relation(fields: [translationGroupId], references: [id], onDelete: Cascade)
   translationGroupId String
   language           Language         @relation(fields: [languageName], references: [name])
   languageName       String
@@ -67,18 +69,18 @@ model User {
 // --- Relationship tables
 
 model TagsOnTranslationGroups {
-  tag                Tag              @relation(fields: [tagId], references: [name])
+  tag                Tag              @relation(fields: [tagId], references: [name], onDelete: Cascade)
   tagId              String
-  translationGroup   TranslationGroup @relation(fields: [translationGroupId], references: [id])
+  translationGroup   TranslationGroup @relation(fields: [translationGroupId], references: [id], onDelete: Cascade)
   translationGroupId String
 
   @@id([tagId, translationGroupId])
 }
 
 model SheetsOnTranslationGroups {
-  sheet              Sheet            @relation(fields: [sheetId], references: [id])
+  sheet              Sheet            @relation(fields: [sheetId], references: [id], onDelete: Cascade)
   sheetId            String
-  translationGroup   TranslationGroup @relation(fields: [translationGroupId], references: [id])
+  translationGroup   TranslationGroup @relation(fields: [translationGroupId], references: [id], onDelete: Cascade)
   translationGroupId String
 
   @@id([sheetId, translationGroupId])

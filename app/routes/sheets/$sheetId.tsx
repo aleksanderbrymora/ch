@@ -1,17 +1,32 @@
-import { FormData } from "@remix-run/node";
-import { FC } from "react";
+import { Transition } from "@remix-run/react/transition";
+import { FC, useEffect, useState } from "react";
 import {
   ActionFunction,
+  Form,
   LoaderFunction,
+  useActionData,
   useCatch,
   useLoaderData,
   useTransition,
 } from "remix";
 import invariant from "tiny-invariant";
+import { match, select } from "ts-pattern";
+import ActionInput from "~/components/edit/ActionInput";
 import SheetLanguageChange from "~/components/edit/SheetLanguageChange";
 import SheetTitleChange from "~/components/edit/SheetTitleChange";
+import WordInput from "~/components/edit/WordInput";
+import { Cancel, Confirm, Edit, Trash } from "~/components/icons";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
+import {
+  addWords,
+  deleteTranslationGroup,
+  editTranslationGroup,
+  findTranslations,
+  updateLanguages,
+  updateTitle,
+} from "~/utils/sheetActions";
+import { SheetAction } from "~/utils/validators";
 
 // Hate to have to extract this information into a separate type,
 // but if I don't want to over-fetch then there is no other choice right now
@@ -26,6 +41,7 @@ interface LoaderData {
     translationGroups: Array<{
       translationGroupId: string;
       translationGroup: {
+        id: string;
         tags: Array<{ tag: { name: string } }>;
         words: Array<{
           language: {
@@ -38,6 +54,10 @@ interface LoaderData {
     }>;
   };
   availableLanguages: string[];
+}
+
+interface ActionData {
+  words?: string[];
 }
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -57,6 +77,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           translationGroupId: true,
           translationGroup: {
             select: {
+              id: true,
               tags: { select: { tag: { select: { name: true } } } },
               words: { select: { language: true, id: true, content: true } },
             },
@@ -77,51 +98,70 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const data: LoaderData = { sheet, availableLanguages };
   return data;
 };
-
-const updateTitle = async (id: string, title: string) => {
-  await db.sheet.update({ where: { id }, data: { title } });
-};
-
-const updateLanguages = async (id: string, from: string, to: string) => {
-  await db.sheet.update({
-    where: { id },
-    data: {
-      from: { connect: { name: from } },
-      to: { connect: { name: to } },
-    },
-  });
-};
-
-type Action = { type: "title.update" } | { type: "languages.update" };
-
 export const action: ActionFunction = async ({ request, params }) => {
-  const id = params.sheetId;
-  invariant(id, "Something went wildly wrong");
+  const sheetId = params.sheetId;
+  invariant(sheetId, "Something went wildly wrong");
 
   const formData = await request.formData();
-
-  console.log({ formData: formData.getAll("form") });
+  const values = Object.fromEntries(formData) as SheetAction;
+  console.log({ formData: values });
 
   try {
-    // switch (sheetAction) {
-    //   case "title.update":
-    const title = formData.get("title")?.toString() || "";
-    //     await updateTitle(id, title);
-    //     break;
-
-    //   case "languages.update":
-    //     const from = formData.get("from-language")?.toString();
-    //     const to = formData.get("to-language")?.toString();
-    //     invariant(from, 'Expected "from" language');
-    //     invariant(to, 'Expected "to" language');
-    //     console.log({ from, to });
-    //     await updateLanguages(id, from, to);
-    //     break;
-
-    //   default:
-    //     break;
-    // }
-    return null;
+    const actionResult = await match(values)
+      .with(
+        { type: "languages.update", from: select("from"), to: select("to") },
+        async ({ from, to }) => {
+          invariant(from, 'Expected "from" language');
+          invariant(to, 'Expected "to" language');
+          await updateLanguages(sheetId, from, to);
+        }
+      )
+      .with({ type: "title.update", title: select() }, async (title) => {
+        invariant(title, "Expected a title");
+        await updateTitle(sheetId, title);
+      })
+      .with(
+        { type: "word.add", from: select("from"), to: select("to") },
+        async ({ from, to }) => {
+          invariant(from, "Expected a word definition");
+          invariant(to, "Expected a word translation");
+          await addWords(sheetId, from, to);
+        }
+      )
+      .with(
+        {
+          type: "word.update",
+          from: select("from"),
+          to: select("to"),
+          fromId: select("fromId"),
+          toId: select("toId"),
+        },
+        async ({ from, to, fromId, toId }) => {
+          await editTranslationGroup({ from, to, fromId, toId });
+        }
+      )
+      .with(
+        { type: "translationGroup.delete", translationGroupId: select() },
+        async (translationGroupId) => {
+          await deleteTranslationGroup(translationGroupId, sheetId);
+        }
+      )
+      .with(
+        {
+          type: "translation.find",
+          from: select("from"),
+          to: select("to"),
+          word: select("word"),
+        },
+        async (wordData) => {
+          const words = await findTranslations(wordData);
+          console.log({ words });
+          const data: ActionData = { words };
+          return data;
+        }
+      )
+      .exhaustive();
+    return actionResult ? actionResult : { ok: true };
   } catch (error) {
     console.log({ error });
     return { status: 403, error };
@@ -129,19 +169,25 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 export default () => {
+  const data = useActionData<ActionData>();
   const { sheet, availableLanguages } = useLoaderData<LoaderData>();
   const transition = useTransition();
 
   return (
-    <div className="grid grid-cols-sheet">
+    <div className="grid grid-cols-sheet gap-10">
       <div>
-        {/* Input form */}
+        <WordInput
+          sheetId={sheet.id}
+          from={sheet.from.name}
+          to={sheet.to.name}
+        />
         {sheet.translationGroups.map((t) => (
           <Row
             key={t.translationGroupId}
             translationGroup={t}
             from={sheet.from.name}
             to={sheet.to.name}
+            transition={transition}
           />
         ))}
       </div>
@@ -178,9 +224,10 @@ interface RowProps {
   from: LoaderData["sheet"]["from"]["name"];
   to: LoaderData["sheet"]["from"]["name"];
   translationGroup: LoaderData["sheet"]["translationGroups"][number];
+  transition: Transition;
 }
 
-const Row: FC<RowProps> = ({ translationGroup, from, to }) => {
+const Row: FC<RowProps> = ({ translationGroup, from, to, transition }) => {
   // return <pre>{JSON.stringify({ translationGroup, from, to }, null, 2)}</pre>;
   const wordFrom = translationGroup.translationGroup.words.find(
     (w) => w.language.name === from
@@ -188,11 +235,69 @@ const Row: FC<RowProps> = ({ translationGroup, from, to }) => {
   const wordTo = translationGroup.translationGroup.words.find(
     (w) => w.language.name === to
   );
-  return (
-    <div className="flex gap-5">
-      <p>{wordFrom?.content}</p>
-      <span>-</span>
-      <p>{wordTo?.content}</p>
-    </div>
-  );
+
+  const [isEdited, setIsEdited] = useState(false);
+
+  useEffect(() => {
+    if (transition.state === "idle") setIsEdited(false);
+  }, [transition.state === "idle"]);
+
+  return match(isEdited)
+    .with(false, () => (
+      <Form
+        method="post"
+        className="group grid items-center grid-cols-word-row gap-10 w-2/3 mx-auto hover:bg-zinc-800 transition-all py-2"
+      >
+        <ActionInput type="translationGroup.delete" />
+        <input
+          hidden
+          aria-hidden="true"
+          name="translationGroupId"
+          defaultValue={translationGroup.translationGroupId}
+        />
+        <p className="text-center">{wordFrom?.content}</p>
+        <span>-</span>
+        <p className="text-center">{wordTo?.content}</p>
+        <div className="group-hover:visible invisible flex gap-3 items-center h-full">
+          <button type="button" onClick={() => setIsEdited(true)}>
+            <Edit />
+          </button>
+          <button type="submit">
+            <Trash />
+          </button>
+        </div>
+      </Form>
+    ))
+    .with(true, () => (
+      <Form
+        method="post"
+        className="group grid items-center grid-cols-word-row gap-10 w-2/3 mx-auto hover:bg-zinc-800 transition-all py-2"
+      >
+        <ActionInput type="word.update" />
+        <input hidden name="fromId" defaultValue={wordFrom?.id} readOnly />
+        <input hidden name="toId" defaultValue={wordTo?.id} readOnly />
+        <input
+          className="text-center"
+          defaultValue={wordFrom?.content}
+          name="from"
+          aria-label="Definition"
+        />
+        <span>-</span>
+        <input
+          className="text-center"
+          defaultValue={wordTo?.content}
+          name="to"
+          aria-label="Definition"
+        />
+        <div className="flex gap-3">
+          <button type="submit">
+            <Confirm />
+          </button>
+          <button type="button" onClick={() => setIsEdited(false)}>
+            <Cancel />
+          </button>
+        </div>
+      </Form>
+    ))
+    .exhaustive();
 };

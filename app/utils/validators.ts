@@ -22,5 +22,15 @@ export const signInSchema = z.object({
 });
 
 export type SheetAction =
-  | { type: "title.update" }
-  | { type: "languages.update" };
+  | { type: "title.update"; title: string }
+  | { type: "languages.update"; from: string; to: string }
+  | { type: "translationGroup.delete"; translationGroupId: string }
+  | {
+      type: "word.update";
+      from: string;
+      to: string;
+      fromId: string;
+      toId: string;
+    }
+  | { type: "translation.find"; word: string; from: string; to: string }
+  | { type: "word.add"; from: string; to: string };
