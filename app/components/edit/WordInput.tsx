@@ -62,7 +62,7 @@ const WordInput = () => {
     >
       <ActionInput type="word.add" />
       <input
-        className="p-2 w-full border-none"
+        className="font-bold p-3 w-full border-none bg-zinc-100 rounded-xl focus:outline-1 focus:outline-blue-400 placeholder:text-zinc-500"
         placeholder="Definition"
         ref={fromInputRef}
         type="text"
@@ -71,9 +71,9 @@ const WordInput = () => {
         aria-label="Definition word"
         required
       />
-      <p>-</p>
+      <p className="font-bold text-lg">-</p>
       <input
-        className="p-2 w-full border-none"
+        className="font-bold p-3 w-full border-none bg-zinc-100 rounded-xl focus:outline-1 focus:outline-blue-400 placeholder:text-zinc-500"
         placeholder="Translation"
         ref={toInputRef}
         type="text"
@@ -83,7 +83,10 @@ const WordInput = () => {
         required
         onFocus={populateSuggestions}
       />
-      <button className="font-bold h-full w-full" type="submit">
+      <button
+        className="font-bold h-full w-full rounded-xl bg-zinc-100 text-zinc-800 hover:bg-zinc-200 transition-colors"
+        type="submit"
+      >
         Add
       </button>
       <div className="col-start-3 py-3 flex gap-1">
