@@ -64,7 +64,12 @@ const SheetLanguageChange = () => {
               </select>
             </>
           ))
-          .with(false, () => <div>From - {capitalize(sheet.from.name)}</div>)
+          .with(false, () => (
+            <div>
+              <span>Definitions - </span>
+              <span className="font-bold">{capitalize(sheet.from.name)}</span>
+            </div>
+          ))
           .exhaustive()}
       </div>
       <div className="flex flex-col gap-1">
@@ -86,7 +91,12 @@ const SheetLanguageChange = () => {
               </select>
             </>
           ))
-          .with(false, () => <div>To - {capitalize(sheet.to.name)}</div>)
+          .with(false, () => (
+            <div>
+              <span>Translations - </span>
+              <span className="font-bold">{capitalize(sheet.to.name)}</span>
+            </div>
+          ))
           .exhaustive()}
       </div>
     </Form>
