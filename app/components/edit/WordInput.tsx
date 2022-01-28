@@ -19,10 +19,12 @@ const WordInput: FC<{
 
   const populateSuggestions = async () => {
     const word = fromInputRef.current?.value;
-    console.log({ word });
     if (!word) return;
     const data: SheetAction = { type: "translation.find", word, from, to };
-    fetcher.submit(data, { method: "post", action: `/sheets/${sheetId}` });
+    fetcher.submit(data, {
+      method: "post",
+      action: `/sheets/${sheetId}`,
+    });
   };
 
   const populateTranslationWithSuggestion = (word: string) => {
@@ -43,6 +45,7 @@ const WordInput: FC<{
     toInputRef.current!.value = "";
     fromInputRef.current!.value = "";
     fromInputRef.current!.focus();
+    setSuggestions([]);
   }, [transition.type === "actionSubmission"]);
 
   return (
