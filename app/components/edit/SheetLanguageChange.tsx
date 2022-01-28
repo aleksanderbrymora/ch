@@ -1,4 +1,4 @@
-import { Form, Link, useLoaderData, useTransition } from "remix";
+import { Form, Link, useLoaderData } from "remix";
 import { match } from "ts-pattern";
 import { capitalize } from "~/utils/textTransformation";
 import { useSearchParamsAction } from "~/utils/useSearchParamsAction";
@@ -8,7 +8,6 @@ import ActionInput from "./ActionInput";
 
 const SheetLanguageChange = () => {
   const { sheet, availableLanguages } = useLoaderData<WordListLoaderData>();
-  const transition = useTransition();
   const { cancel, edit, isChanging } = useSearchParamsAction("languages");
 
   return (

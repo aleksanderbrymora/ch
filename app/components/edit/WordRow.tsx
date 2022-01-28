@@ -1,16 +1,19 @@
 import { FC, useEffect, useState } from "react";
-import { Form } from "remix";
+import { Form, useTransition } from "remix";
 import { match } from "ts-pattern";
 import ActionInput from "~/components/edit/ActionInput";
 import { Cancel, Confirm, Edit, Trash } from "~/components/icons";
-import { RowProps } from "../../routes/sheets/$sheetId";
+import { WordListLoaderData } from "~/utils/validators";
 
-export const Row: FC<RowProps> = ({
-  translationGroup,
-  from,
-  to,
-  transition,
-}) => {
+export interface RowProps {
+  from: WordListLoaderData["sheet"]["from"]["name"];
+  to: WordListLoaderData["sheet"]["from"]["name"];
+  translationGroup: WordListLoaderData["sheet"]["translationGroups"][number];
+}
+
+export const Row: FC<RowProps> = ({ translationGroup, from, to }) => {
+  const transition = useTransition();
+
   const wordFrom = translationGroup.translationGroup.words.find(
     (w) => w.language.name === from
   );

@@ -1,4 +1,3 @@
-import { Transition } from "@remix-run/react/transition";
 import {
   ActionFunction,
   LoaderFunction,
@@ -9,12 +8,13 @@ import {
 } from "remix";
 import invariant from "tiny-invariant";
 import { match, select } from "ts-pattern";
-import { z } from "zod";
 import SheetLanguageChange from "~/components/edit/SheetLanguageChange";
 import SheetTitleChange from "~/components/edit/SheetTitleChange";
+import SortChange from "~/components/edit/SortChange";
 import WordInput from "~/components/edit/WordInput";
 import WordList from "~/components/edit/WordList";
 import { db } from "~/utils/db.server";
+import { processSheet } from "~/utils/processSheet";
 import { requireUserId } from "~/utils/session.server";
 import {
   addWords,
@@ -24,26 +24,16 @@ import {
   updateLanguages,
   updateTitle,
 } from "~/utils/sheetActions";
-import { WordListLoaderData, SheetAction } from "~/utils/validators";
-import { Row } from "../../components/edit/WordRow";
-
-// Hate to have to extract this information into a separate type,
-// but if I don't want to over-fetch then there is no other choice right now
+import { SheetAction, WordListLoaderData } from "~/utils/validators";
 
 interface ActionData {
   words?: string[];
 }
 
-const orderDetails = (link: string) => {
-  const url = new URL(link);
-  const orderDirection = url.searchParams.get("orderDir");
-
-  const orderDirSchema = z.enum(["asc", "desc"]).optional();
-  const orderDirValidation = orderDirSchema.safeParse(orderDirection);
-  return orderDirValidation.success ? orderDirValidation.data : undefined;
-};
-
-export const loader: LoaderFunction = async ({ request, params }) => {
+export const loader: LoaderFunction = async ({
+  request,
+  params,
+}): Promise<WordListLoaderData> => {
   invariant(params.sheetId, "Expected an id of the sheet");
   await requireUserId(request);
 
@@ -79,33 +69,11 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     await db.language.findMany({ select: { name: true } })
   ).map((l) => l.name);
 
-  const orderDir = orderDetails(request.url);
-
-  return match(orderDir)
-    .with(undefined, () => {
-      console.log({ orderDir });
-      const data: WordListLoaderData = { sheet, availableLanguages };
-      return data;
-    })
-    .with("asc", (dir) => {
-      // sheet.translationGroups.sort((a, b) => {
-      //   const first = a.translationGroup.words.find(
-      //     (w) => w.language.name === sheet.from.name
-      //   );
-
-      //   const second = b.translationGroup.words.find(
-      //     (w) => w.language.name === sheet.from.name
-      //   );
-
-      //   return first!.content.localeCompare(second!.content);
-      // });
-      const data: WordListLoaderData = { sheet, availableLanguages };
-      return data;
-    })
-    .with("desc", (dir) => {
-      const data: WordListLoaderData = { sheet, availableLanguages };
-      return data;
-    });
+  const data: WordListLoaderData = {
+    sheet: processSheet(sheet, request.url),
+    availableLanguages,
+  };
+  return data;
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -192,13 +160,14 @@ export default () => {
           from={sheet.from.name}
           to={sheet.to.name}
         />
-        <WordList sheet={sheet} transition={transition} />
+        <WordList />
       </div>
       <aside>
         <div className="h-min sticky top-10 bg-zinc-800 p-5 rounded-xl shadow-lg shadow-blue-500/20 flex-col flex gap-5">
           <p className="text-3xl font-bold">Actions</p>
           <SheetTitleChange />
           <SheetLanguageChange />
+          <SortChange />
         </div>
       </aside>
     </div>
@@ -212,10 +181,3 @@ export const CatchBoundary = () => {
     return <p>{caught.data}</p>;
   }
 };
-
-export interface RowProps {
-  from: WordListLoaderData["sheet"]["from"]["name"];
-  to: WordListLoaderData["sheet"]["from"]["name"];
-  translationGroup: WordListLoaderData["sheet"]["translationGroups"][number];
-  transition: Transition;
-}
