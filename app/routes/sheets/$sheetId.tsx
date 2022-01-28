@@ -148,18 +148,10 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 export default () => {
-  const data = useActionData<ActionData>();
-  const { sheet, availableLanguages } = useLoaderData<WordListLoaderData>();
-  const transition = useTransition();
-
   return (
     <div className="grid grid-cols-sheet gap-10">
       <div>
-        <WordInput
-          sheetId={sheet.id}
-          from={sheet.from.name}
-          to={sheet.to.name}
-        />
+        <WordInput />
         <WordList />
       </div>
       <aside>

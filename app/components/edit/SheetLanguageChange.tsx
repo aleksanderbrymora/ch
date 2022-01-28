@@ -1,7 +1,8 @@
-import { Form, Link, useLoaderData } from "remix";
+import { Form, Link, useLoaderData, useSearchParams } from "remix";
 import { match } from "ts-pattern";
+import { useSearchParamsAction } from "~/utils/hooks/useSearchParamsAction";
+import { useSheetRouteWithSearchParams } from "~/utils/hooks/useSheetRouteWithSearchParams";
 import { capitalize } from "~/utils/textTransformation";
-import { useSearchParamsAction } from "~/utils/useSearchParamsAction";
 import { WordListLoaderData } from "~/utils/validators";
 import { Cancel, Confirm, Edit } from "../icons";
 import ActionInput from "./ActionInput";
@@ -11,7 +12,7 @@ const SheetLanguageChange = () => {
   const { cancel, edit, isChanging } = useSearchParamsAction("languages");
 
   return (
-    <Form method="post" action={`/sheets/${sheet.id}`}>
+    <Form method="post" action={cancel}>
       <ActionInput type="languages.update" />
       <div className="flex gap-3 items-center">
         <p className="text-lg font-bold items-center">Languages</p>

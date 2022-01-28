@@ -1,9 +1,9 @@
 import { useSearchParams } from "remix";
-import { toSearchParams } from "./urlHelper";
-import { changeActionString } from "./validators";
+import { toSearchParams } from "../urlHelper";
+import { changeActionString } from "../validators";
 
 export const useSearchParamsAction = (actionString: string) => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const l = changeActionString(actionString);
   const isChanging = Boolean(searchParams.get(l));
 

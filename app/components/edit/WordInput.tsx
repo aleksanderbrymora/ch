@@ -1,17 +1,14 @@
-import { FC, useEffect, useRef, useState } from "react";
-import { Form, useFetcher, useTransition } from "remix";
-import { findTranslations } from "~/utils/sheetActions";
-import { SheetAction } from "~/utils/validators";
+import { useEffect, useRef, useState } from "react";
+import { Form, useFetcher, useLoaderData, useTransition } from "remix";
+import { useSheetRouteWithSearchParams } from "~/utils/hooks/useSheetRouteWithSearchParams";
+import { SheetAction, WordListLoaderData } from "~/utils/validators";
 import ActionInput from "./ActionInput";
 
-const WordInput: FC<{
-  sheetId: string;
-  from: string;
-  to: string;
-  words?: string[];
-}> = ({ sheetId, to, from }) => {
+const WordInput = () => {
   const transition = useTransition();
   const fetcher = useFetcher();
+  const { sheet } = useLoaderData<WordListLoaderData>();
+  const path = useSheetRouteWithSearchParams();
 
   const fromInputRef = useRef<HTMLInputElement>(null);
   const toInputRef = useRef<HTMLInputElement>(null);
@@ -19,11 +16,19 @@ const WordInput: FC<{
 
   const populateSuggestions = async () => {
     const word = fromInputRef.current?.value;
-    if (!word) return;
-    const data: SheetAction = { type: "translation.find", word, from, to };
+    if (!word) {
+      setSuggestions([]);
+      return;
+    }
+    const data: SheetAction = {
+      type: "translation.find",
+      word,
+      from: sheet.from.name,
+      to: sheet.to.name,
+    };
     fetcher.submit(data, {
       method: "post",
-      action: `/sheets/${sheetId}`,
+      action: `/sheets/${sheet.id}`,
     });
   };
 
@@ -39,6 +44,7 @@ const WordInput: FC<{
       suggestions.length !== 0;
 
     if (!suggestionsSame) setSuggestions(newSuggestions);
+    else if (newSuggestions.length === 0) setSuggestions([]);
   }, [fetcher.type === "done"]);
 
   useEffect(() => {
@@ -51,7 +57,7 @@ const WordInput: FC<{
   return (
     <Form
       method="post"
-      action={`/sheets/${sheetId}`}
+      action={path}
       className="grid grid-cols-word-row gap-x-3 rounded-xl bg-zinc-800 px-5 pt-5 items-center sticky top-10 mb-10 shadow-lg shadow-blue-500/20"
     >
       <ActionInput type="word.add" />
@@ -80,7 +86,7 @@ const WordInput: FC<{
       <button className="font-bold h-full w-full" type="submit">
         Add
       </button>
-      <div className="col-start-3 py-3 h-[50px] flex gap-1">
+      <div className="col-start-3 py-3 flex gap-1">
         {suggestions.map((s, i) => (
           <button
             type="button"

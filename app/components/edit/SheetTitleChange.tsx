@@ -1,19 +1,19 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Form, Link, useLoaderData, useTransition } from "remix";
 import { match } from "ts-pattern";
-import { useSearchParamsAction } from "~/utils/useSearchParamsAction";
+import { useSearchParamsAction } from "~/utils/hooks/useSearchParamsAction";
+import { useSheetRouteWithSearchParams } from "~/utils/hooks/useSheetRouteWithSearchParams";
 import { WordListLoaderData } from "~/utils/validators";
 import { Cancel, Confirm, Edit } from "../icons";
 import ActionInput from "./ActionInput";
 
 const SheetTitleChange = () => {
   const titleRef = useRef<HTMLInputElement>(null);
-  const transition = useTransition();
   const { sheet } = useLoaderData<WordListLoaderData>();
   const { cancel, edit, isChanging } = useSearchParamsAction("title");
 
   return (
-    <Form method="post">
+    <Form method="post" action={cancel}>
       <div className="flex gap-3 items-center">
         <legend className="text-lg font-bold">Title</legend>
         {match(isChanging)
