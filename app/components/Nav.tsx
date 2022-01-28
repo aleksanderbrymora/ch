@@ -3,7 +3,7 @@ import { Link } from "remix";
 
 const Nav: FC<{ userId: string | null }> = ({ userId }) => {
   return (
-    <nav className="flex justify-between container mx-auto my-5">
+    <nav className="flex justify-between container mx-auto my-5 px-1 md:px-5">
       <div className="flex gap-5 items-center">
         <Link to="/">Home</Link>
         <Link to="/sheets">Sheets</Link>

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { capitalize } from "./textTransformation";
 
 export const signUpSchema = z.object({
   username: z.string().min(3),
@@ -34,3 +35,32 @@ export type SheetAction =
     }
   | { type: "translation.find"; word: string; from: string; to: string }
   | { type: "word.add"; from: string; to: string };
+
+export interface WordListLoaderData {
+  sheet: {
+    id: string;
+    title: string;
+    points: number;
+    updatedAt: Date;
+    from: { name: string };
+    to: { name: string };
+    translationGroups: Array<{
+      translationGroupId: string;
+      translationGroup: {
+        id: string;
+        tags: Array<{ tag: { name: string } }>;
+        words: Array<{
+          language: {
+            name: string;
+          };
+          id: string;
+          content: string;
+        }>;
+      };
+    }>;
+  };
+  availableLanguages: string[];
+}
+
+export const changeActionString = (action: string) =>
+  `change${capitalize(action)}`;

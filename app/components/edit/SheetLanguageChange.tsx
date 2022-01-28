@@ -1,92 +1,93 @@
-import { Transition } from "@remix-run/react/transition";
-import { FC, useEffect, useState } from "react";
-import { Form } from "remix";
+import { Form, Link, useLoaderData, useTransition } from "remix";
+import { match } from "ts-pattern";
 import { capitalize } from "~/utils/textTransformation";
+import { useSearchParamsAction } from "~/utils/useSearchParamsAction";
+import { WordListLoaderData } from "~/utils/validators";
 import { Cancel, Confirm, Edit } from "../icons";
 import ActionInput from "./ActionInput";
 
-const SheetLanguageChange: FC<{
-  availableLanguages: string[];
-  from: string;
-  to: string;
-  id: string;
-  transition: Transition;
-}> = ({ availableLanguages, from, to, id, transition }) => {
-  const [isChangingLanguage, setIsChangingLanguage] = useState(false);
-
-  useEffect(() => {
-    if (transition.state === "idle") setIsChangingLanguage(false);
-  }, [transition.state === "idle"]);
+const SheetLanguageChange = () => {
+  const { sheet, availableLanguages } = useLoaderData<WordListLoaderData>();
+  const transition = useTransition();
+  const { cancel, edit, isChanging } = useSearchParamsAction("languages");
 
   return (
-    <Form method="post" action={`/sheets/${id}`}>
+    <Form method="post" action={`/sheets/${sheet.id}`}>
       <ActionInput type="languages.update" />
       <div className="flex gap-3 items-center">
         <p className="text-lg font-bold items-center">Languages</p>
-        {isChangingLanguage ? (
-          <fieldset className="flex gap-1 items-center">
-            <button type="submit" aria-label="Update title of this cheat sheet">
-              <Confirm />
-            </button>
-            <button
+        {match(isChanging)
+          .with(true, () => (
+            <fieldset className="flex gap-1 items-center">
+              <button
+                type="submit"
+                aria-label="Update title of this cheat sheet"
+              >
+                <Confirm />
+              </button>
+              <Link
+                aria-label="Cancel editing the title of this cheat sheet"
+                type="button"
+                to={cancel}
+              >
+                <Cancel />
+              </Link>
+            </fieldset>
+          ))
+          .with(false, () => (
+            <Link
+              aria-label="Edit the title of this cheat sheet"
+              to={edit}
               type="button"
-              aria-label="Cancel editing the title of this cheat sheet"
-              onClick={() => setIsChangingLanguage(false)}
             >
-              <Cancel />
-            </button>
-          </fieldset>
-        ) : (
-          <button
-            aria-label="Edit the title of this cheat sheet"
-            onClick={() => setIsChangingLanguage(true)}
-            type="button"
-          >
-            <Edit />
-          </button>
-        )}
+              <Edit />
+            </Link>
+          ))
+          .exhaustive()}
       </div>
       <div className="flex flex-col gap-1">
-        {isChangingLanguage ? (
-          <>
-            <label htmlFor="from-language-select">From</label>
-            <select
-              name="from"
-              className="text-black p-2 rounded-md"
-              id="from-language-select"
-              defaultValue={from}
-            >
-              {availableLanguages.map((l) => (
-                <option key={`${l}-from`} value={l}>
-                  {capitalize(l)}
-                </option>
-              ))}
-            </select>
-          </>
-        ) : (
-          <div>From - {capitalize(from)}</div>
-        )}
+        {match(isChanging)
+          .with(true, () => (
+            <>
+              <label htmlFor="from-language-select">From</label>
+              <select
+                name="from"
+                className="text-black p-2 rounded-md"
+                id="from-language-select"
+                defaultValue={sheet.from.name}
+              >
+                {availableLanguages.map((l) => (
+                  <option key={`${l}-from`} value={l}>
+                    {capitalize(l)}
+                  </option>
+                ))}
+              </select>
+            </>
+          ))
+          .with(false, () => <div>From - {capitalize(sheet.from.name)}</div>)
+          .exhaustive()}
       </div>
       <div className="flex flex-col gap-1">
-        {isChangingLanguage ? (
-          <>
-            <label htmlFor="from-language-select">To</label>
-            <select
-              name="to"
-              className="text-black p-2 rounded-md"
-              id="to-language-select"
-              defaultValue={to}
-            >
-              {availableLanguages.map((l) => (
-                <option key={`${l}-to`} value={l}>
-                  {capitalize(l)}
-                </option>
-              ))}
-            </select>
-          </>
-        ) : (
-          <div>To - {capitalize(to)}</div>
-        )}
+        {match(isChanging)
+          .with(true, () => (
+            <>
+              <label htmlFor="from-language-select">To</label>
+              <select
+                name="to"
+                className="text-black p-2 rounded-md"
+                id="to-language-select"
+                defaultValue={sheet.to.name}
+              >
+                {availableLanguages.map((l) => (
+                  <option key={`${l}-to`} value={l}>
+                    {capitalize(l)}
+                  </option>
+                ))}
+              </select>
+            </>
+          ))
+          .with(false, () => <div>To - {capitalize(sheet.to.name)}</div>)
+          .exhaustive()}
       </div>
     </Form>
   );

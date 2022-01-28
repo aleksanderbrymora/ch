@@ -110,7 +110,7 @@ export const findTranslations = async ({
     where: {
       words: {
         some: {
-          content: { search: word },
+          content: { contains: word },
           language: { is: { name: from } },
         },
       },

@@ -1,5 +1,6 @@
-import { ChangeEvent, FC, useEffect, useRef, useState } from "react";
-import { Form, useFetcher, useSubmit, useTransition } from "remix";
+import { FC, useEffect, useRef, useState } from "react";
+import { Form, useFetcher, useTransition } from "remix";
+import { findTranslations } from "~/utils/sheetActions";
 import { SheetAction } from "~/utils/validators";
 import ActionInput from "./ActionInput";
 
@@ -9,38 +10,40 @@ const WordInput: FC<{
   to: string;
   words?: string[];
 }> = ({ sheetId, to, from }) => {
-  const fromInput = useRef<HTMLInputElement>(null);
-  const toInput = useRef<HTMLInputElement>(null);
   const transition = useTransition();
   const fetcher = useFetcher();
-  const [suggestions, setSuggestions] = useState<string[]>();
 
-  // potentially won't work as fetcher.data might be an array
-  useEffect(() => {
-    console.log(fetcher.data);
-    if (fetcher.data?.words) setSuggestions(fetcher.data.words);
-  }, [fetcher.data, fetcher.state === "idle"]);
+  const fromInputRef = useRef<HTMLInputElement>(null);
+  const toInputRef = useRef<HTMLInputElement>(null);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
-  const findTranslationsFor = (e: ChangeEvent<HTMLInputElement>) => {
-    const word = e.target.value;
-    if (word !== "") {
-      const data: SheetAction = { type: "translation.find", word, from, to };
-      fetcher.submit(data, { method: "post", action: `/sheets/${sheetId}` });
-    } else {
-      setSuggestions([]);
-    }
+  const populateSuggestions = async () => {
+    const word = fromInputRef.current?.value;
+    console.log({ word });
+    if (!word) return;
+    const data: SheetAction = { type: "translation.find", word, from, to };
+    fetcher.submit(data, { method: "post", action: `/sheets/${sheetId}` });
   };
 
   const populateTranslationWithSuggestion = (word: string) => {
-    toInput.current!.value = word;
-    toInput.current!.focus();
+    toInputRef.current!.value = word;
+    toInputRef.current!.focus();
   };
 
   useEffect(() => {
-    toInput.current!.value = "";
-    fromInput.current!.value = "";
-    fromInput.current!.focus();
-  }, [transition.state === "idle"]);
+    const newSuggestions: string[] = fetcher.data?.words ?? [];
+    const suggestionsSame =
+      newSuggestions.every((s, i) => suggestions[i] === s) &&
+      suggestions.length !== 0;
+
+    if (!suggestionsSame) setSuggestions(newSuggestions);
+  }, [fetcher.type === "done"]);
+
+  useEffect(() => {
+    toInputRef.current!.value = "";
+    fromInputRef.current!.value = "";
+    fromInputRef.current!.focus();
+  }, [transition.type === "actionSubmission"]);
 
   return (
     <Form
@@ -52,35 +55,35 @@ const WordInput: FC<{
       <input
         className="p-2 w-full border-none"
         placeholder="Definition"
-        ref={fromInput}
+        ref={fromInputRef}
         type="text"
         name="from"
         defaultValue=""
         aria-label="Definition word"
         required
-        onChange={findTranslationsFor}
       />
       <p>-</p>
       <input
         className="p-2 w-full border-none"
         placeholder="Translation"
-        ref={toInput}
+        ref={toInputRef}
         type="text"
         name="to"
         defaultValue=""
         aria-label="Translation word"
         required
+        onFocus={populateSuggestions}
       />
       <button className="font-bold h-full w-full" type="submit">
         Add
       </button>
       <div className="col-start-3 py-3 h-[50px] flex gap-1">
-        {suggestions?.map((s) => (
+        {suggestions.map((s, i) => (
           <button
             type="button"
             className="rounded-full border-blue-400 border px-3 py-1 font-bold text-xs hover:bg-zinc-700 transition-colors h-full"
             onClick={() => populateTranslationWithSuggestion(s)}
-            key={s}
+            key={s + i}
           >
             {s}
           </button>

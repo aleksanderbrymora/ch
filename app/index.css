@@ -902,6 +902,11 @@ Ensure the default browser behavior of the `hidden` attribute.
   padding-right: 0.75rem;
 }
 
+.px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
 .pt-1 {
   padding-top: 0.25rem;
 }
@@ -1139,4 +1144,11 @@ input {
 
 .group:hover .group-hover\:visible {
   visibility: visible;
+}
+
+@media (min-width: 768px) {
+  .md\:px-5 {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
 }
