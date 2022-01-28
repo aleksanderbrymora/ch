@@ -1,11 +1,10 @@
-import { Transition } from "@remix-run/react/transition";
-import { FC, memo } from "react";
-import { useLoaderData } from "remix";
-import { WordListLoaderData } from "~/utils/validators";
+import { useActionData, useFetcher, useLoaderData, useTransition } from "remix";
+import { SheetAction, WordListLoaderData } from "~/utils/validators";
 import { Row } from "./WordRow";
 
 const WordList = () => {
   const { sheet } = useLoaderData<WordListLoaderData>();
+
   return (
     <div>
       {sheet.translationGroups.map((t) => (
