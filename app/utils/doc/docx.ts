@@ -37,8 +37,17 @@ const prepareChildren = (items: TranslationGroup[]) => {
 };
 
 export const generateDoc = async (sheet: WordListLoaderData["sheet"]) => {
-  //todo create an array of sorted words
-  const words = [{ from: "", to: "" }];
+  const words: { from: string; to: string }[] = sheet.translationGroups.map(
+    (t) => {
+      const from = t.translationGroup.words.find(
+        (w) => w.language.name === sheet.from.name
+      )!.content;
+      const to = t.translationGroup.words.find(
+        (w) => w.language.name === sheet.to.name
+      )!.content;
+      return { from, to };
+    }
+  );
 
   const paragraphs = Array(3).fill(
     new TableCell({
@@ -56,10 +65,10 @@ export const generateDoc = async (sheet: WordListLoaderData["sheet"]) => {
         right: 10,
       },
       borders: {
-        top: { size: 0.5, color: "black", style: BorderStyle.SINGLE },
-        bottom: { size: 0.5, color: "black", style: BorderStyle.SINGLE },
-        left: { size: 0.5, color: "black", style: BorderStyle.SINGLE },
-        right: { size: 0.5, color: "black", style: BorderStyle.SINGLE },
+        top: { size: 0.5, style: BorderStyle.SINGLE },
+        bottom: { size: 0.5, style: BorderStyle.SINGLE },
+        left: { size: 0.5, style: BorderStyle.SINGLE },
+        right: { size: 0.5, style: BorderStyle.SINGLE },
       },
     })
   );

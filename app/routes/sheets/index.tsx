@@ -62,7 +62,7 @@ export default () => {
   return (
     <div className="grid grid-cols-1 gap-10">
       <Sheets title="Your Cheat Sheets" sheets={userSheets} />
-      <Link to="/sheets/all" className="w-min whitespace-nowrap underline">
+      <Link to="/sheets/all" className="underline w-min whitespace-nowrap">
         See all of your Cheat Sheets
       </Link>
       <Sheets title="Popular Cheat Sheets" sheets={topSheets} />
@@ -85,7 +85,7 @@ const Sheets = ({
           <Link
             key={s.id}
             to={`/sheets/${s.id}`}
-            className="bg-blue-100 p-3 rounded-xl text-black hover:bg-blue-300 transition-all duration-200 shadow-lg shadow-blue-500/50 hover:shadow-xl"
+            className="p-3 text-black transition-all duration-200 bg-blue-100 shadow-lg rounded-xl hover:bg-blue-300 shadow-blue-500/50 hover:shadow-xl"
           >
             <h3 className="text-xl font-bold">{s.title}</h3>
             <p className="text-xs">{distanceToNow(s.updatedAt)}</p>

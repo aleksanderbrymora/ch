@@ -89,7 +89,7 @@ export default function Login() {
 
   return (
     <div className="w-1/3 p-5 mx-auto mt-20">
-      <h1 className="text-4xl font-bold whitespace-nowrap mb-5">
+      <h1 className="mb-5 text-4xl font-bold whitespace-nowrap">
         Sign up to Cheat Sheets
       </h1>
       <p className="mb-5">
@@ -112,7 +112,7 @@ export default function Login() {
               focusUsername ? "border-blue-400" : "border-transparent"
             )}
           >
-            <label htmlFor="username-input" className="text-xs w-full">
+            <label htmlFor="username-input" className="w-full text-xs">
               Username
             </label>
             <input
@@ -126,7 +126,7 @@ export default function Login() {
               }
               onFocus={() => setFocusUsername(true)}
               onBlur={() => setFocusUsername(false)}
-              className="form-input w-full bg-transparent border-none font-bold rounded mt-1 text-white focus:outline-none"
+              className="w-full mt-1 font-bold text-white bg-transparent border-none rounded form-input focus:outline-none"
             />
           </div>
           {actionData?.fieldErrors?.username ? (
@@ -146,7 +146,7 @@ export default function Login() {
               focusPassword ? "border-blue-400" : "border-transparent"
             )}
           >
-            <label htmlFor="password-input" className="text-xs w-full">
+            <label htmlFor="password-input" className="w-full text-xs">
               Password
             </label>
             <input
@@ -162,7 +162,7 @@ export default function Login() {
               }
               onFocus={() => setFocusPassword(true)}
               onBlur={() => setFocusPassword(false)}
-              className="form-input w-full bg-transparent border-none font-bold rounded mt-1 text-white focus:outline-none"
+              className="w-full mt-1 font-bold text-white bg-transparent border-none rounded form-input focus:outline-none"
             />
           </div>
           {actionData?.fieldErrors?.password ? (
@@ -183,7 +183,7 @@ export default function Login() {
         <div className="col-span-2">
           <button
             type="submit"
-            className="rounded-full bg-zinc-800 py-3 px-16 font-bold"
+            className="px-16 py-3 font-bold rounded-full bg-zinc-800"
           >
             Submit
           </button>

@@ -8,6 +8,7 @@ import {
 } from "remix";
 import invariant from "tiny-invariant";
 import { match, select } from "ts-pattern";
+import GenerateDoc from "~/components/edit/GenerateDoc";
 import SheetLanguageChange from "~/components/edit/SheetLanguageChange";
 import SheetTitleChange from "~/components/edit/SheetTitleChange";
 import SortChange from "~/components/edit/SortChange";
@@ -149,17 +150,18 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default () => {
   return (
-    <div className="grid grid-cols-sheet gap-10">
+    <div className="grid gap-10 grid-cols-sheet">
       <div>
         <WordInput />
         <WordList />
       </div>
       <aside>
-        <div className="h-min sticky top-10 bg-zinc-800 p-5 rounded-xl shadow-lg shadow-blue-500/20 flex-col flex gap-5">
+        <div className="sticky flex flex-col gap-5 p-5 shadow-lg h-min top-10 bg-zinc-800 rounded-xl shadow-blue-500/20">
           <p className="text-3xl font-bold">Actions</p>
           <SheetTitleChange />
           <SheetLanguageChange />
           <SortChange />
+          <GenerateDoc />
         </div>
       </aside>
     </div>
