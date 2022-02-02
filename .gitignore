@@ -8,3 +8,4 @@ node_modules
 /app/index.css
 
 /app/routes/example.tsx
+/cypress/integration/examples/
