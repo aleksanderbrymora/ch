@@ -88,8 +88,8 @@ export default function Login() {
   const [focusPassword, setFocusPassword] = useState(false);
 
   return (
-    <div className="w-1/3 p-5 mx-auto mt-20">
-      <h1 className="mb-5 text-4xl font-bold whitespace-nowrap">
+    <div className="w-full lg:w-1/2 xl:w-1/3 p-5 mx-auto mt-20">
+      <h1 className="mb-5 text-4xl font-bold  w-full">
         Sign up to Cheat Sheets
       </h1>
       <p className="mb-5">
@@ -103,9 +103,9 @@ export default function Login() {
         aria-describedby={
           actionData?.formError ? "form-error-message" : undefined
         }
-        className="grid grid-cols-2 gap-5"
+        className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-2 w-full"
       >
-        <div>
+        <div className="w-full col-span-1 row-start-1">
           <div
             className={clsx(
               `bg-zinc-800 pt-1 pb-3 px-4 rounded-xl border-2`,
@@ -139,7 +139,7 @@ export default function Login() {
             </p>
           ) : null}
         </div>
-        <div>
+        <div className="w-full row-start-2 md:row-start-1">
           <div
             className={clsx(
               `bg-zinc-800 pt-1 pb-3 px-4 rounded-xl border-2`,
@@ -185,7 +185,7 @@ export default function Login() {
             type="submit"
             className="px-16 py-3 font-bold rounded-full bg-zinc-800"
           >
-            Submit
+            Register
           </button>
         </div>
       </Form>
