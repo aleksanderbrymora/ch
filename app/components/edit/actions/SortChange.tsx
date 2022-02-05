@@ -1,5 +1,4 @@
-import clsx from "clsx";
-import { Form, Link, useSearchParams } from "remix";
+import { Link, useSearchParams } from "remix";
 import { toSearchParams } from "~/utils/urlHelper";
 
 const SortChange = () => {

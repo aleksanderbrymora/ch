@@ -9,9 +9,7 @@ import {
 import invariant from "tiny-invariant";
 import { match, select } from "ts-pattern";
 import GenerateDoc from "~/components/edit/GenerateDoc";
-import SheetLanguageChange from "~/components/edit/SheetLanguageChange";
-import SheetTitleChange from "~/components/edit/SheetTitleChange";
-import SortChange from "~/components/edit/SortChange";
+import SortChange from "~/components/edit/actions/SortChange";
 import WordInput from "~/components/edit/WordInput";
 import WordList from "~/components/edit/WordList";
 import { db } from "~/utils/db.server";
@@ -26,6 +24,8 @@ import {
   updateTitle,
 } from "~/utils/sheetActions";
 import { SheetAction, WordListLoaderData } from "~/utils/validators";
+import SheetLanguageChange from "~/components/edit/actions/SheetLanguageChange";
+import SheetTitleChange from "~/components/edit/actions/SheetTitleChange";
 
 interface ActionData {
   words?: string[];

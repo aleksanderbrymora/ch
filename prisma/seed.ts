@@ -1,4 +1,4 @@
-import * as faker from "@faker-js/faker";
+import { faker } from "@faker-js/faker";
 import { PrismaClient, User } from "@prisma/client";
 import argon from "argon2";
 
@@ -29,7 +29,7 @@ const db = new PrismaClient();
             from: { connect: { name: polish.name } },
             to: { connect: { name: english.name } },
             translationGroups: {
-              create: Array(100)
+              create: Array(1000)
                 .fill(true)
                 .map((_) => ({
                   translationGroup: {
