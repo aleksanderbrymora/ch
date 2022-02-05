@@ -1,22 +1,19 @@
-import { useEffect, useRef } from "react";
-import { Form, Link, useLoaderData, useTransition } from "remix";
+import { useRef } from "react";
 import { match } from "ts-pattern";
-import { useSearchParamsAction } from "~/utils/hooks/useSearchParamsAction";
-import { useSheetRouteWithSearchParams } from "~/utils/hooks/useSheetRouteWithSearchParams";
-import { WordListLoaderData } from "~/utils/validators";
 import { Cancel, Confirm, Edit } from "~/components/icons";
+import { useEditAction } from "~/utils/hooks/useEditAction";
 import ActionInput from "../ActionInput";
 
 const SheetTitleChange = () => {
   const titleRef = useRef<HTMLInputElement>(null);
-  const { sheet } = useLoaderData<WordListLoaderData>();
-  const { cancel, edit, isChanging } = useSearchParamsAction("title");
+  const { sheet, cancel, edit, Form, isEditing, optimisticProps } =
+    useEditAction(["title"]);
 
   return (
-    <Form method="post" action={cancel}>
+    <Form method="post">
       <div className="flex gap-3 items-center">
         <legend className="text-lg font-bold">Title</legend>
-        {match(isChanging)
+        {match(isEditing)
           .with(true, () => (
             <div className="flex gap-1">
               <button
@@ -25,24 +22,31 @@ const SheetTitleChange = () => {
               >
                 <Confirm />
               </button>
-              <Link
-                to={cancel}
+              <button
+                type="button"
+                onClick={cancel}
                 aria-label="Cancel editing the title of this cheat sheet"
               >
                 <Cancel />
-              </Link>
+              </button>
             </div>
           ))
           .with(false, () => (
-            <Link aria-label="Edit the title of this cheat sheet" to={edit}>
+            <button
+              aria-label="Edit the title of this cheat sheet"
+              onClick={edit}
+              type="button"
+            >
               <Edit />
-            </Link>
+            </button>
           ))
           .exhaustive()}
       </div>
       <ActionInput type="title.update" />
-      {match(isChanging)
-        .with(false, () => <p className="py-1">{sheet.title}</p>)
+      {match(isEditing)
+        .with(false, () => (
+          <p className="py-1">{optimisticProps.title || sheet.title}</p>
+        ))
         .with(true, () => (
           <input
             type="text"

@@ -1,21 +1,24 @@
-import { Form, Link, useLoaderData } from "remix";
+import { useLoaderData } from "remix";
 import { match } from "ts-pattern";
 import { Cancel, Confirm, Edit } from "~/components/icons";
-import { useSearchParamsAction } from "~/utils/hooks/useSearchParamsAction";
+import { useEditAction } from "~/utils/hooks/useEditAction";
 import { capitalize } from "~/utils/textTransformation";
 import { WordListLoaderData } from "~/utils/validators";
 import ActionInput from "../ActionInput";
 
 const SheetLanguageChange = () => {
   const { sheet, availableLanguages } = useLoaderData<WordListLoaderData>();
-  const { cancel, edit, isChanging } = useSearchParamsAction("languages");
+  const { isEditing, Form, cancel, edit, optimisticProps } = useEditAction([
+    "from",
+    "to",
+  ]);
 
   return (
-    <Form method="post" action={cancel}>
+    <Form method="post">
       <ActionInput type="languages.update" />
       <div className="flex gap-3 items-center">
         <p className="text-lg font-bold items-center">Languages</p>
-        {match(isChanging)
+        {match(isEditing)
           .with(true, () => (
             <fieldset className="flex gap-1 items-center">
               <button
@@ -24,28 +27,28 @@ const SheetLanguageChange = () => {
               >
                 <Confirm />
               </button>
-              <Link
+              <button
                 aria-label="Cancel editing the title of this cheat sheet"
                 type="button"
-                to={cancel}
+                onClick={cancel}
               >
                 <Cancel />
-              </Link>
+              </button>
             </fieldset>
           ))
           .with(false, () => (
-            <Link
+            <button
               aria-label="Edit the title of this cheat sheet"
-              to={edit}
+              onClick={edit}
               type="button"
             >
               <Edit />
-            </Link>
+            </button>
           ))
           .exhaustive()}
       </div>
       <div className="flex flex-col gap-1">
-        {match(isChanging)
+        {match(isEditing)
           .with(true, () => (
             <>
               <label htmlFor="from-language-select">From</label>
@@ -53,7 +56,7 @@ const SheetLanguageChange = () => {
                 name="from"
                 className="text-black p-2 rounded-md"
                 id="from-language-select"
-                defaultValue={sheet.from.name}
+                defaultValue={optimisticProps.from || sheet.from.name}
               >
                 {availableLanguages.map((l) => (
                   <option key={`${l}-from`} value={l}>
@@ -66,13 +69,15 @@ const SheetLanguageChange = () => {
           .with(false, () => (
             <div>
               <span>Definitions - </span>
-              <span className="font-bold">{capitalize(sheet.from.name)}</span>
+              <span className="font-bold">
+                {capitalize(optimisticProps.from || sheet.from.name)}
+              </span>
             </div>
           ))
           .exhaustive()}
       </div>
       <div className="flex flex-col gap-1">
-        {match(isChanging)
+        {match(isEditing)
           .with(true, () => (
             <>
               <label htmlFor="from-language-select">To</label>
@@ -80,7 +85,7 @@ const SheetLanguageChange = () => {
                 name="to"
                 className="text-black p-2 rounded-md"
                 id="to-language-select"
-                defaultValue={sheet.to.name}
+                defaultValue={optimisticProps.to || sheet.to.name}
               >
                 {availableLanguages.map((l) => (
                   <option key={`${l}-to`} value={l}>
@@ -93,7 +98,9 @@ const SheetLanguageChange = () => {
           .with(false, () => (
             <div>
               <span>Translations - </span>
-              <span className="font-bold">{capitalize(sheet.to.name)}</span>
+              <span className="font-bold">
+                {capitalize(optimisticProps.to || sheet.to.name)}
+              </span>
             </div>
           ))
           .exhaustive()}
