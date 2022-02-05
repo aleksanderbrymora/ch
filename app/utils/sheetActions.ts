@@ -1,5 +1,5 @@
-import { string } from "zod";
 import { db } from "./db.server";
+import { uniq } from "lodash";
 
 export const updateTitle = async (id: string, title: string) => {
   await db.sheet.update({ where: { id }, data: { title } });
@@ -122,11 +122,13 @@ export const findTranslations = async ({
         },
       },
     },
-    take: 3,
+    take: 10,
   });
 
-  return translationGroups.reduce<string[]>(
-    (acc, curr) => [...acc, ...curr.words.map((w) => w.content)],
-    []
+  return uniq(
+    translationGroups.reduce<string[]>(
+      (acc, curr) => [...acc, ...curr.words.map((w) => w.content)],
+      []
+    )
   );
 };

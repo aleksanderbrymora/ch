@@ -755,6 +755,22 @@ Ensure the default browser behavior of the `hidden` attribute.
   row-gap: 0.5rem;
 }
 
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+
+.overflow-y-hidden {
+  overflow-y: hidden;
+}
+
+.overflow-x-scroll {
+  overflow-x: scroll;
+}
+
+.overflow-y-scroll {
+  overflow-y: scroll;
+}
+
 .whitespace-nowrap {
   white-space: nowrap;
 }
@@ -1064,6 +1080,10 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 .opacity-60 {
   opacity: 0.6;
+}
+
+.opacity-90 {
+  opacity: 0.9;
 }
 
 .shadow-lg {

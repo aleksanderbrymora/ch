@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import { Form, useSearchParams, useTransition } from "remix";
 
 const SortChange = () => {
@@ -9,12 +8,10 @@ const SortChange = () => {
     searchParams.get("sort") ||
     "";
 
-  const isSorting = transition.state === "submitting";
-
   return (
     <Form method="get">
       <p className="text-lg font-bold items-center">Sort words</p>
-      <div className={clsx("flex gap-1", isSorting && "opacity-60")}>
+      <div className="flex gap-1">
         <button
           className={
             dir === "none" || dir === "" ? "font-bold" : "hover:underline"
