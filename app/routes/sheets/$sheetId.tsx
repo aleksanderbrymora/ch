@@ -149,11 +149,12 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 export default () => {
+  const { sheet } = useLoaderData<WordListLoaderData>();
   return (
     <div className="grid gap-10 grid-cols-sheet">
       <div>
         <WordInput />
-        <WordList />
+        <WordList sheet={sheet} />
       </div>
       <aside>
         <div className="sticky flex flex-col gap-5 p-5 shadow-lg h-min top-10 bg-zinc-800 rounded-xl shadow-blue-500/20">

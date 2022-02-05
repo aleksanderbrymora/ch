@@ -4,8 +4,8 @@ import { match } from "ts-pattern";
 import { useSearchParamsAction } from "~/utils/hooks/useSearchParamsAction";
 import { useSheetRouteWithSearchParams } from "~/utils/hooks/useSheetRouteWithSearchParams";
 import { WordListLoaderData } from "~/utils/validators";
-import { Cancel, Confirm, Edit } from "../icons";
-import ActionInput from "./ActionInput";
+import { Cancel, Confirm, Edit } from "~/components/icons";
+import ActionInput from "../ActionInput";
 
 const SheetTitleChange = () => {
   const titleRef = useRef<HTMLInputElement>(null);

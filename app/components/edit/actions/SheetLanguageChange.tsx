@@ -1,11 +1,10 @@
-import { Form, Link, useLoaderData, useSearchParams } from "remix";
+import { Form, Link, useLoaderData } from "remix";
 import { match } from "ts-pattern";
+import { Cancel, Confirm, Edit } from "~/components/icons";
 import { useSearchParamsAction } from "~/utils/hooks/useSearchParamsAction";
-import { useSheetRouteWithSearchParams } from "~/utils/hooks/useSheetRouteWithSearchParams";
 import { capitalize } from "~/utils/textTransformation";
 import { WordListLoaderData } from "~/utils/validators";
-import { Cancel, Confirm, Edit } from "../icons";
-import ActionInput from "./ActionInput";
+import ActionInput from "../ActionInput";
 
 const SheetLanguageChange = () => {
   const { sheet, availableLanguages } = useLoaderData<WordListLoaderData>();
