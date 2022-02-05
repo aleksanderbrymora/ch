@@ -9,9 +9,15 @@ export interface RowProps {
   from: WordListLoaderData["sheet"]["from"]["name"];
   to: WordListLoaderData["sheet"]["from"]["name"];
   translationGroup: WordListLoaderData["sheet"]["translationGroups"][number];
+  separator: WordListLoaderData["sheet"]["translationSeparator"];
 }
 
-export const Row: FC<RowProps> = ({ translationGroup, from, to }) => {
+export const Row: FC<RowProps> = ({
+  translationGroup,
+  from,
+  to,
+  separator,
+}) => {
   const transition = useTransition();
   const fetcher = useFetcher();
   const [isEdited, setIsEdited] = useState(false);
@@ -50,7 +56,7 @@ export const Row: FC<RowProps> = ({ translationGroup, from, to }) => {
               defaultValue={translationGroup.translationGroupId}
             />
             <p className="text-center">{wordFrom?.content}</p>
-            <span>-</span>
+            <span>{separator}</span>
             <p className="text-center">{wordTo?.content}</p>
             <div className="group-hover:visible invisible flex gap-3 items-center h-full">
               <button type="button" onClick={() => setIsEdited(true)}>
@@ -76,7 +82,7 @@ export const Row: FC<RowProps> = ({ translationGroup, from, to }) => {
               name="from"
               aria-label="Definition"
             />
-            <span>-</span>
+            <span>{separator}</span>
             <input
               className="text-center w-full"
               defaultValue={wordTo?.content}

@@ -132,3 +132,18 @@ export const findTranslations = async ({
     )
   );
 };
+
+export const updateSeparators = async ({
+  translationSeparator,
+  groupSeparator,
+  sheetId,
+}: {
+  translationSeparator: string;
+  groupSeparator: string;
+  sheetId: string;
+}) => {
+  await db.sheet.update({
+    where: { id: sheetId },
+    data: { groupSeparator, translationSeparator },
+  });
+};

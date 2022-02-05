@@ -34,6 +34,11 @@ export type SheetAction =
       toId: string;
     }
   | { type: "translation.find"; word: string; from: string; to: string }
+  | {
+      type: "separators.update";
+      translationSeparator: string;
+      groupSeparator: string;
+    }
   | { type: "word.add"; from: string; to: string };
 
 export interface WordListLoaderData {
@@ -42,6 +47,8 @@ export interface WordListLoaderData {
     title: string;
     points: number;
     updatedAt: Date;
+    groupSeparator: string;
+    translationSeparator: string;
     from: { name: string };
     to: { name: string };
     translationGroups: Array<{

@@ -17,7 +17,7 @@ const SheetLanguageChange = () => {
     <Form method="post">
       <ActionInput type="languages.update" />
       <div className="flex gap-3 items-center">
-        <p className="text-lg font-bold items-center">Languages</p>
+        <legend className="text-lg font-bold items-center">Languages</legend>
         {match(isEditing)
           .with(true, () => (
             <fieldset className="flex gap-1 items-center">

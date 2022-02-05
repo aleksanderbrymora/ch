@@ -40,16 +40,18 @@ model Language {
 }
 
 model Sheet {
-  id                String                      @id @unique @default(uuid())
-  title             String                      @default("New Cheat Sheet")
-  lookedAtTimes     Int                         @default(0)
-  points            Int                         @default(0)
-  containsProfanity Boolean                     @default(false)
-  createdAt         DateTime                    @default(now())
-  updatedAt         DateTime                    @updatedAt
-  translationGroups SheetsOnTranslationGroups[]
-  createdBy         User                        @relation(fields: [createdByUserId], references: [id])
-  createdByUserId   String
+  id                   String                      @id @unique @default(uuid())
+  title                String                      @default("New Cheat Sheet")
+  lookedAtTimes        Int                         @default(0)
+  points               Int                         @default(0)
+  containsProfanity    Boolean                     @default(false)
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  translationGroups    SheetsOnTranslationGroups[]
+  createdBy            User                        @relation(fields: [createdByUserId], references: [id])
+  createdByUserId      String
+  translationSeparator String                      @default("=")
+  groupSeparator       String                      @default("; ")
 
   from         Language @relation(name: "fromLanguage", fields: [fromLanguage], references: [name])
   fromLanguage String

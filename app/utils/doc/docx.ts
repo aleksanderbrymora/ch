@@ -17,20 +17,24 @@ interface TranslationGroup {
   to: string;
 }
 
-const prepareChildren = (items: TranslationGroup[]) => {
+const prepareChildren = (
+  items: TranslationGroup[],
+  translationSeparator: string,
+  groupSeparator: string
+) => {
   const children = items.map((pair) => [
     new TextRun({
       text: pair.from,
       bold: true,
     }),
     new TextRun({
-      text: "=",
+      text: translationSeparator,
     }),
     new TextRun({
       text: pair.to,
     }),
     new TextRun({
-      text: "; ",
+      text: groupSeparator,
     }),
   ]);
   return children.flat();
@@ -54,7 +58,11 @@ export const generateDoc = async (sheet: WordListLoaderData["sheet"]) => {
       children: [
         new Paragraph({
           style: "cheat",
-          children: prepareChildren(words),
+          children: prepareChildren(
+            words,
+            sheet.translationSeparator,
+            sheet.groupSeparator
+          ),
           alignment: AlignmentType.JUSTIFIED,
         }),
       ],

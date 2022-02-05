@@ -2,6 +2,7 @@ import { ActionFunction, LoaderFunction, useCatch, useLoaderData } from "remix";
 import invariant from "tiny-invariant";
 import { match, select } from "ts-pattern";
 import SheetLanguageChange from "~/components/edit/actions/SheetLanguageChange";
+import SheetSeparatorsChange from "~/components/edit/actions/SheetSeparatorsChange";
 import SheetTitleChange from "~/components/edit/actions/SheetTitleChange";
 import SortChange from "~/components/edit/actions/SortChange";
 import GenerateDoc from "~/components/edit/GenerateDoc";
@@ -16,6 +17,7 @@ import {
   editTranslationGroup,
   findTranslations,
   updateLanguages,
+  updateSeparators,
   updateTitle,
 } from "~/utils/sheetActions";
 import { SheetAction, WordListLoaderData } from "~/utils/validators";
@@ -40,6 +42,8 @@ export const loader: LoaderFunction = async ({
       points: true,
       from: { select: { name: true } },
       to: { select: { name: true } },
+      groupSeparator: true,
+      translationSeparator: true,
       translationGroups: {
         select: {
           translationGroupId: true,
@@ -133,6 +137,28 @@ export const action: ActionFunction = async ({ request, params }) => {
           return data;
         }
       )
+      .with(
+        {
+          type: "separators.update",
+          translationSeparator: select("translationSeparator"),
+          groupSeparator: select("groupSeparator"),
+        },
+        async ({ translationSeparator, groupSeparator }) => {
+          invariant(
+            translationSeparator,
+            "You must provide a separator for your words"
+          );
+          invariant(
+            groupSeparator,
+            "You must provide a separator for groups of words"
+          );
+          await updateSeparators({
+            translationSeparator,
+            groupSeparator,
+            sheetId,
+          });
+        }
+      )
       .exhaustive();
     return actionResult ? actionResult : { ok: true };
   } catch (error) {
@@ -155,6 +181,7 @@ export default () => {
           <SheetTitleChange />
           <SheetLanguageChange />
           <SortChange />
+          <SheetSeparatorsChange />
           <GenerateDoc />
         </div>
       </aside>

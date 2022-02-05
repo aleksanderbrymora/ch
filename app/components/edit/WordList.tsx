@@ -1,5 +1,4 @@
 import { FC, memo } from "react";
-import { useLoaderData } from "remix";
 import { WordListLoaderData } from "~/utils/validators";
 import { Row } from "./WordRow";
 
@@ -12,6 +11,7 @@ const WordList: FC<{ sheet: WordListLoaderData["sheet"] }> = ({ sheet }) => {
           translationGroup={t}
           from={sheet.from.name}
           to={sheet.to.name}
+          separator={sheet.translationSeparator}
         />
       ))}
     </div>
@@ -19,6 +19,9 @@ const WordList: FC<{ sheet: WordListLoaderData["sheet"] }> = ({ sheet }) => {
 };
 
 export default memo(WordList, (prev, now) => {
+  if (prev.sheet.translationSeparator !== now.sheet.translationSeparator)
+    return false;
+
   for (let i = 0; i < prev.sheet.translationGroups.length; i++) {
     const prevTG = prev.sheet.translationGroups[i].translationGroup;
     const nowTG = now.sheet.translationGroups[i].translationGroup;

@@ -70,6 +70,7 @@ const WordInput = () => {
         defaultValue=""
         aria-label="Definition word"
         required
+        autoComplete="off"
       />
       <p className="font-bold text-lg">-</p>
       <input
