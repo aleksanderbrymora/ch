@@ -89,11 +89,14 @@ const WordInput = () => {
       >
         Add
       </button>
-      <div className="col-start-3 py-3 flex gap-1">
+      <div
+        style={{ scrollbarWidth: "none" }}
+        className="col-start-3 py-3 flex gap-1 w-full overflow-x-scroll overflow-y-hidden"
+      >
         {suggestions.map((s, i) => (
           <button
             type="button"
-            className="rounded-full border-blue-400 border px-3 py-1 font-bold text-xs hover:bg-zinc-700 transition-colors h-full"
+            className="rounded-full border-blue-400 border px-3 py-1 font-bold text-xs hover:bg-zinc-700 transition-colors h-full whitespace-nowrap"
             onClick={() => populateTranslationWithSuggestion(s)}
             key={s + i}
           >
